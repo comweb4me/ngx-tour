@@ -65,6 +65,7 @@ export class TourService<T extends IStepOption = IStepOption> {
   public anchors: { [anchorId: string]: TourAnchorDirective } = {};
   private status: TourState = TourState.OFF;
   private isHotKeysEnabled = true;
+  private direction: string = "next";
 
   constructor(private router: Router) {}
 
@@ -137,12 +138,13 @@ export class TourService<T extends IStepOption = IStepOption> {
   }
 
   public next(): void {
+    this.direction = "next";
     if (this.hasNext(this.currentStep)) {
-      this.goToStep(
-        this.loadStep(
-          this.currentStep.nextStep || this.steps.indexOf(this.currentStep) + 1
-        )
-      );
+        this.goToStep(
+          this.loadStep(
+            this.currentStep.nextStep || this.steps.indexOf(this.currentStep) + 1
+          )
+        );
     }
   }
 
@@ -158,12 +160,13 @@ export class TourService<T extends IStepOption = IStepOption> {
   }
 
   public prev(): void {
+    this.direction = "prev";
     if (this.hasPrev(this.currentStep)) {
-      this.goToStep(
-        this.loadStep(
-          this.currentStep.prevStep || this.steps.indexOf(this.currentStep) - 1
-        )
-      );
+        this.goToStep(
+          this.loadStep(
+            this.currentStep.prevStep || this.steps.indexOf(this.currentStep) - 1
+          )
+        );
     }
   }
 
@@ -180,6 +183,8 @@ export class TourService<T extends IStepOption = IStepOption> {
   }
 
   public register(anchorId: string, anchor: TourAnchorDirective): void {
+    if (!anchorId)
+      return;
     if (this.anchors[anchorId]) {
       throw new Error('anchorId ' + anchorId + ' already registered!');
     }
@@ -188,6 +193,8 @@ export class TourService<T extends IStepOption = IStepOption> {
   }
 
   public unregister(anchorId: string): void {
+    if (!anchorId)
+      return;
     delete this.anchors[anchorId];
     this.anchorUnregister$.next(anchorId);
   }
@@ -247,14 +254,12 @@ export class TourService<T extends IStepOption = IStepOption> {
   private showStep(step: T): void {
     const anchor = this.anchors[step && step.anchorId];
     if (!anchor) {
-      console.warn(
-        'Can\'t attach to unregistered anchor with id ' + step.anchorId
-      );
-      this.end();
-      return;
+      let stepIndex = this.steps.indexOf(step);
+      this.skipStep(stepIndex);
+    } else {
+      anchor.showTourStep(step);
+      this.stepShow$.next(step);
     }
-    anchor.showTourStep(step);
-    this.stepShow$.next(step);
   }
 
   private hideStep(step: T): void {
@@ -264,5 +269,18 @@ export class TourService<T extends IStepOption = IStepOption> {
     }
     anchor.hideTourStep();
     this.stepHide$.next(step);
+  }
+
+  private skipStep(stepIndex: number) {
+    switch(this.direction) { 
+      case "next": { 
+        this.goto(stepIndex + 1);
+        break;
+      } 
+      case "prev": { 
+        this.goto(stepIndex - 1);
+        break;
+      }
+    }
   }
 }
