@@ -162,7 +162,7 @@ export class TourService<T extends IStepOption = IStepOption> {
 
   public hasNext(step: T): boolean {
     if (!step) {
-      console.warn('Can\'t get next step. No currentStep.');
+      // console.warn('Can\'t get next step. No currentStep.');
       return false;
     }
     return (
@@ -187,7 +187,7 @@ export class TourService<T extends IStepOption = IStepOption> {
 
   public hasPrev(step: T): boolean {
     if (!step) {
-      console.warn('Can\'t get previous step. No currentStep.');
+      // console.warn('Can\'t get previous step. No currentStep.');
       return false;
     }
     return step.prevStep !== undefined || this.steps.indexOf(step) > 0;
@@ -224,7 +224,7 @@ export class TourService<T extends IStepOption = IStepOption> {
 
   private goToStep(step: T): void {
     if (!step) {
-      console.warn('Can\'t go to non-existent step');
+      // console.warn('Can\'t go to non-existent step');
       this.end();
       return;
     }
