@@ -26,6 +26,12 @@ export enum TourState {
   PAUSED
 }
 
+export enum TourDirection {
+  None = 0,
+  Next = 1,
+  Previous = 2
+}
+
 @Injectable()
 export class TourService<T extends IStepOption = IStepOption> {
   public stepShow$: Subject<T> = new Subject();
@@ -65,9 +71,11 @@ export class TourService<T extends IStepOption = IStepOption> {
   public anchors: { [anchorId: string]: TourAnchorDirective } = {};
   private status: TourState = TourState.OFF;
   private isHotKeysEnabled = true;
-  private direction: string = "next";
+  private direction: TourDirection = TourDirection.Next;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+  ) { }
 
   public initialize(steps: T[], stepDefaults?: T): void {
     if (steps && steps.length > 0) {
@@ -107,6 +115,7 @@ export class TourService<T extends IStepOption = IStepOption> {
     this.hideStep(this.currentStep);
     this.currentStep = undefined;
     this.end$.next();
+    this.direction = TourDirection.Next;
   }
 
   public pause(): void {
@@ -138,13 +147,16 @@ export class TourService<T extends IStepOption = IStepOption> {
   }
 
   public next(): void {
-    this.direction = "next";
+    this.direction = TourDirection.Next;
     if (this.hasNext(this.currentStep)) {
-        this.goToStep(
-          this.loadStep(
-            this.currentStep.nextStep || this.steps.indexOf(this.currentStep) + 1
-          )
-        );
+      this.goToStep(
+        this.loadStep(
+          this.currentStep.nextStep || this.steps.indexOf(this.currentStep) + 1
+        )
+      );
+    } else {
+      this.end();
+      return;
     }
   }
 
@@ -160,13 +172,16 @@ export class TourService<T extends IStepOption = IStepOption> {
   }
 
   public prev(): void {
-    this.direction = "prev";
+    this.direction = TourDirection.Previous;
     if (this.hasPrev(this.currentStep)) {
-        this.goToStep(
-          this.loadStep(
-            this.currentStep.prevStep || this.steps.indexOf(this.currentStep) - 1
-          )
-        );
+      this.goToStep(
+        this.loadStep(
+          this.currentStep.prevStep || this.steps.indexOf(this.currentStep) - 1
+        )
+      );
+    } else {
+      this.end();
+      return;
     }
   }
 
@@ -255,14 +270,14 @@ export class TourService<T extends IStepOption = IStepOption> {
     const anchor = this.anchors[step && step.anchorId];
     if (!anchor) {
       let stepIndex = this.steps.indexOf(step);
-      this.skipStep(stepIndex);
+      this.skipStep();
     } else {
       anchor.showTourStep(step);
       this.stepShow$.next(step);
     }
   }
 
-  private hideStep(step: T): void {
+  protected hideStep(step: T): void {
     const anchor = this.anchors[step && step.anchorId];
     if (!anchor) {
       return;
@@ -271,14 +286,14 @@ export class TourService<T extends IStepOption = IStepOption> {
     this.stepHide$.next(step);
   }
 
-  private skipStep(stepIndex: number) {
-    switch(this.direction) { 
-      case "next": { 
-        this.goto(stepIndex + 1);
+  private skipStep() {
+    switch (this.direction) {
+      case TourDirection.Next: {
+        this.next();
         break;
-      } 
-      case "prev": { 
-        this.goto(stepIndex - 1);
+      }
+      case TourDirection.Previous: {
+        this.prev();
         break;
       }
     }
