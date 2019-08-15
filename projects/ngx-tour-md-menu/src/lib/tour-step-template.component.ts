@@ -38,10 +38,9 @@ import {NgxmTourService} from './ngx-md-menu-tour.service';
   `,
 })
 export class TourStepTemplateComponent extends TourHotkeyListenerComponent implements AfterViewInit {
-  @ViewChild(MatMenu) public tourStep: MatMenu;
+  @ViewChild(MatMenu, {static: false}) public tourStep: MatMenu;
 
-  @Input()
-  @ContentChild(TemplateRef)
+  @ContentChild(TemplateRef, {static: false})
   public stepTemplate: TemplateRef<{ step: IStepOption }>;
 
   public step: IStepOption = {};

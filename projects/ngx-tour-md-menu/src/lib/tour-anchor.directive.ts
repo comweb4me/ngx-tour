@@ -63,11 +63,10 @@ export class TourAnchorMatMenuDirective
     this.tourStepTemplate.templateComponent.step = step;
     // Ignore step.placement
     if (!step.preventScrolling) {
-      if (!withinviewport(this.element.nativeElement, { sides: 'bottom' })) {
-        (<HTMLElement>this.element.nativeElement).scrollIntoView(false);
-      } else if (
-        !withinviewport(this.element.nativeElement, { sides: 'left top right' })
-      ) {
+      // if (!withinviewport(this.element.nativeElement, { sides: 'bottom' })) {
+      if (!this.isElementInViewport(this.element.nativeElement)) {
+        // (<HTMLElement>this.element.nativeElement).scrollIntoView(false);
+      // } else if (!withinviewport(this.element.nativeElement, { sides: 'left top right' })) {
         (<HTMLElement>this.element.nativeElement).scrollIntoView(true);
       }
     }
@@ -109,4 +108,15 @@ export class TourAnchorMatMenuDirective
       this.tourBackdrop.close();
     }
   }
+
+  private isElementInViewport (el) {
+    var rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    );
+}
 }

@@ -9,5 +9,5 @@ import { MatMenuTrigger, MatMenu } from '@angular/material';
 export class TourAnchorOpenerComponent {
   @Input() menu: MatMenu = new MatMenu(undefined, undefined, { xPosition: 'after', yPosition: 'below', overlapTrigger: true, backdropClass: '' });
 
-  @ViewChild(MatMenuTrigger) public trigger: MatMenuTrigger;
+  @ViewChild(MatMenuTrigger, {static: false}) public trigger: MatMenuTrigger;
 }
