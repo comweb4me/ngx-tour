@@ -10,6 +10,6 @@
     "@angular/animations": "^8.1.2",
     "@angular/cdk": "^8.1.2",
     "@angular/material": "^8.1.2",
-    "ngx-tour-core": "comweb4me/cw-tour-core#test-branch"
+    "ngx-tour-core": "comweb4me/cw-tour-core#v1.0.1"
   }
 }
